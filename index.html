@@ -3,23 +3,27 @@
 <head>
     <meta charset="utf-8">
     <title>Annuaire</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 <body>
 
 <div class="container">
     <h1 style="text-align: center">Annuaire</h1>
+
     <div class="row">
         <div class="form-horizontal">
             <div class="form-group">
-                <label for="nom" class="col-sm-2 control-label">Nom</label>
+                <label for="nom" class="col-sm-2 control-label">Nom (prénom)</label>
+
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="nom">
+                    <input type="text" class="form-control" id="nom" placeholder="ou CUID complet">
                 </div>
             </div>
         </div>
     </div>
     <br><br>
+
     <div class="row">
         <table id="resultats" class="table table-hover table-striped">
             <tr>
@@ -39,37 +43,48 @@
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 <script>
     var inputNom = $("#nom");
-    var inputPrenom = $("#prenom");
+    var resultats = $("#resultats");
+    var url = "http://ldap-webcom.kermit.rd.francetelecom.fr/api/v1";
 
-    function search() {
-        if (inputNom.val().length > 2) {
-            $.ajax({
-                url: "http://ldap-webcom.kermit.rd.francetelecom.fr/api/v1/users?name=" + inputNom.val()
-            }).done(function (data) {
-                $.each(data.results, function (index, valeur) {
-                    $("#resultats").append($("<tr>")
-                            .addClass("lignesResultats")
-                            .append($("<td>").html('<a href="' + valeur.x_directoryurl + '">' + valeur.cn + '</a>'))
-                            .append($("<td>").html(valeur.sn))
-                            .append($("<td>").html(valeur.givenname))
-                            .append($("<td>").html(valeur.mail))
-                            .append($("<td>").html(valeur.department))
-                            .append($("<td>").html(valeur.l))
-                            .append($("<td>").html('<a href="http://annuaire.sso.infra.ftgroup/clickvoice?phone=' + valeur.telephonenumber + '">' + valeur.telephonenumber + '</a>'))
-                            .append($("<td>").html('<img src="' + valeur.x_photourl+ '">'))
-                    );
+    function search(value) {
+        if (value.length > 2) {
+            if (/^[a-z]{4}[0-9]{4}$/i.test(value)) {
+                $.ajax({url: url + "/users/" + value, error: function (err) {console.log(err);}}).done(function (data) {
+                    addTr(data.user);
                 });
-            });
+            } else {
+                $.ajax({url: url + "/users?name=" + inputNom.val()}).done(function (data) {
+                    $.each(data.results, function (index, valeur) {
+                        addTr(valeur);
+                    });
+                });
+            }
         }
     }
 
-    $("body").keypress(function(e){
-        if(e.keyCode == 13) {
+    function addTr(objet) {
+        resultats.append(
+                $("<tr>")
+                        .addClass("lignesResultats")
+                        .append($("<td>").html('<a href="' + objet.x_directoryurl + '">' + objet.cn + '</a>'))
+                        .append($("<td>").html(objet.sn))
+                        .append($("<td>").html(objet.givenname))
+                        .append($("<td>").html(objet.mail))
+                        .append($("<td>").html(objet.department))
+                        .append($("<td>").html(objet.l))
+                        .append($("<td>").html('<a href="http://annuaire.sso.infra.ftgroup/clickvoice?phone=' + objet.telephonenumber + '">' + objet.telephonenumber + '</a>'))
+                        .append($("<td>").html('<img src="' + objet.x_photourl + '" alt="profile" width="35">'))
+        );
+    }
+
+    $("body").keypress(function (e) {
+        if (e.keyCode == 13) {
             $(".lignesResultats").remove();
-            search();
+            search(inputNom.val());
         }
     });
-    $("document").ready(function(){
+
+    $("document").ready(function () {
         inputNom.focus();
     });
 </script>
