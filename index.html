@@ -14,10 +14,10 @@
     <div class="row">
         <div class="form-horizontal">
             <div class="form-group">
-                <label for="nom" class="col-sm-2 control-label">Nom (prénom)</label>
+                <label for="name" class="col-sm-2 control-label">Nom (prénom)</label>
 
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="nom" placeholder="ou CUID complet">
+                    <input type="text" class="form-control" id="name" placeholder="ou CUID complet">
                 </div>
             </div>
         </div>
@@ -25,12 +25,13 @@
     <br><br>
 
     <div class="row">
-        <table id="resultats" class="table table-hover table-striped">
+        <table id="results" class="table table-hover table-striped">
             <tr>
                 <th>CN</th>
                 <th>Nom</th>
                 <th>Prénom</th>
                 <th>Email</th>
+                <th></th>
                 <th>Département</th>
                 <th>Etablissement</th>
                 <th>Téléphone</th>
@@ -42,50 +43,54 @@
 
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 <script>
-    var inputNom = $("#nom");
-    var resultats = $("#resultats");
-    var url = "http://ldap-webcom.kermit.rd.francetelecom.fr/api/v1";
+    var inputName = $("#name");
+    var results = $("#results");
+
+    var apiLdapUri = "http://ldap-webcom.kermit.rd.francetelecom.fr/api/v1";
+    var resultSet = "resultSet";
 
     function search(value) {
-        if (value.length > 2) {
-            if (/^[a-z]{4}[0-9]{4}$/i.test(value)) {
-                $.ajax({url: url + "/users/" + value, error: function (err) {console.log(err);}}).done(function (data) {
-                    addTr(data.user);
+        if (/^[a-z]{4}[0-9]{4}$/i.test(value)) {
+            $.ajax({url: apiLdapUri + "/users/" + value}).done(function (data) {
+                addTr(data.user);
+            });
+        } else if (value.length > 2) {
+            $.ajax({url: apiLdapUri + "/users?name=" + value}).done(function (data) {
+                $.each(data.results, function (index, user) {
+                    addTr(user);
                 });
-            } else {
-                $.ajax({url: url + "/users?name=" + inputNom.val()}).done(function (data) {
-                    $.each(data.results, function (index, valeur) {
-                        addTr(valeur);
-                    });
-                });
-            }
+            });
         }
     }
 
-    function addTr(objet) {
-        resultats.append(
+    function addTr(user) {
+        results.append(
                 $("<tr>")
-                        .addClass("lignesResultats")
-                        .append($("<td>").html('<a href="' + objet.x_directoryurl + '">' + objet.cn + '</a>'))
-                        .append($("<td>").html(objet.sn))
-                        .append($("<td>").html(objet.givenname))
-                        .append($("<td>").html(objet.mail))
-                        .append($("<td>").html(objet.department))
-                        .append($("<td>").html(objet.l))
-                        .append($("<td>").html('<a href="http://annuaire.sso.infra.ftgroup/clickvoice?phone=' + objet.telephonenumber + '">' + objet.telephonenumber + '</a>'))
-                        .append($("<td>").html('<img src="' + objet.x_photourl + '" alt="profile" width="35">'))
+                        .addClass(resultSet)
+                        .append($("<td>").append($("<a>").attr({href: user.x_directoryurl}).text(user.cn)))
+                        .append($("<td>").text(user.sn))
+                        .append($("<td>").text(user.givenname))
+                        .append($("<td>").text(user.mail))
+                        .append($("<td>").append($("<a>").attr({href: "mailto:" + user.mail}).append($("<span>").addClass("glyphicon glyphicon-envelope").attr({"aria-hidden": true}))))
+                        .append($("<td>").text(user.department))
+                        .append($("<td>").text(user.l))
+                        .append($("<td>").append($("<a>").attr({
+                            href: "http://annuaire.sso.infra.ftgroup/clickvoice?phone=" + user.telephonenumber,
+                            target: "_blank"
+                        }).text(user.telephonenumber)))
+                        .append($("<td>").append($("<img>").attr({src: user.x_photourl, alt: "profile", width: "35"})))
         );
     }
 
     $("body").keypress(function (e) {
         if (e.keyCode == 13) {
-            $(".lignesResultats").remove();
-            search(inputNom.val());
+            $("." + resultSet).remove();
+            search(inputName.val());
         }
     });
 
     $("document").ready(function () {
-        inputNom.focus();
+        inputName.focus();
     });
 </script>
 </body>
