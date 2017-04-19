@@ -105,7 +105,7 @@
 
     $("document").ready(function () {
         var searchParameter = getSearchParams("search");
-        if (searchParameter != "") {
+        if (searchParameter !== undefined && searchParameter != "") {
             inputName.val(searchParameter);
             search(searchParameter);
         }
