@@ -71,22 +71,24 @@
     }
 
     function addTr(user) {
-        results.append(
-            $("<tr>")
-                .addClass(resultSet)
-                .append($("<td>").append($("<a>").attr({href: user.x_directoryurl}).text(user.cn)))
-                .append($("<td>").text(user.sn))
-                .append($("<td>").text(user.givenname))
-                .append($("<td>").text(user.mail))
-                .append($("<td>").append($("<a>").attr({href: "mailto:" + user.mail}).append($("<span>").addClass("glyphicon glyphicon-envelope").attr({"aria-hidden": true}))))
-                .append($("<td>").text(user.department))
-                .append($("<td>").text(user.l))
-                .append($("<td>").append($("<a>").attr({
-                    href: "http://annuaire.sso.infra.ftgroup/clickvoice?phone=" + user.telephonenumber,
-                    target: "_blank"
-                }).text(user.telephonenumber)))
-                .append($("<td>").append($("<img>").attr({src: user.x_photourl, alt: "profile", width: "35"})))
-        );
+        if(user.cn && user.sn && user.givenname) {
+            results.append(
+                $("<tr>")
+                    .addClass(resultSet)
+                    .append($("<td>").append($("<a>").attr({href: user.x_directoryurl}).text(user.cn)))
+                    .append($("<td>").text(user.sn))
+                    .append($("<td>").text(user.givenname))
+                    .append($("<td>").text(user.mail))
+                    .append($("<td>").append($("<a>").attr({href: "mailto:" + user.mail}).append($("<span>").addClass("glyphicon glyphicon-envelope").attr({"aria-hidden": true}))))
+                    .append($("<td>").text(user.department))
+                    .append($("<td>").text(user.l))
+                    .append($("<td>").append($("<a>").attr({
+                        href: "http://annuaire.sso.infra.ftgroup/clickvoice?phone=" + user.telephonenumber,
+                        target: "_blank"
+                    }).text(user.telephonenumber)))
+                    .append($("<td>").append($("<img>").attr({src: user.x_photourl, alt: "profile", width: "35"})))
+            );
+        }
     }
 
     $("body").keypress(function (e) {
