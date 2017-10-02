@@ -71,11 +71,11 @@
     }
 
     function addTr(user) {
-        if(user.cn && user.sn && user.givenname) {
+        if(user.cuid && user.sn && user.givenname) {
             results.append(
                 $("<tr>")
                     .addClass(resultSet)
-                    .append($("<td>").append($("<a>").attr({href: user.x_directoryurl}).text(user.cn)))
+                    .append($("<td>").append($("<a>").attr({href: user.x_directoryurl}).text(user.cuid)))
                     .append($("<td>").text(user.sn))
                     .append($("<td>").text(user.givenname))
                     .append($("<td>").text(user.mail))
